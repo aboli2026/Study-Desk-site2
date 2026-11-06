@@ -111,10 +111,10 @@ if ('serviceWorker' in navigator) {
   import('virtual:pwa-register').then(({ registerSW }) => {
     registerSW({
       immediate: true,
-      onRegisteredSW(_swUrl, r) {
+      onRegisteredSW(_swUrl?: string, r?: ServiceWorkerRegistration) {
         console.log('Study Desk Service Worker registered:', r);
       },
-      onRegisterError(error) {
+      onRegisterError(error?: unknown) {
         console.warn('Study Desk Service Worker registration failed:', error);
       },
     });

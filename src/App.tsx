@@ -4,7 +4,6 @@ import { NoteItem } from './types';
 import { NotesView } from './components/NotesView';
 import { SettingsView } from './components/SettingsView';
 import { OfflineIndicator } from './components/OfflineIndicator';
-import { PWAInstallButton } from './components/PWAInstallButton';
 import {
   getAllNotesFromStorage,
   saveAllNotesToStorage,
@@ -155,7 +154,6 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          <PWAInstallButton variant="compact" />
           {/* Settings Icon Button */}
           <button
             type="button"
