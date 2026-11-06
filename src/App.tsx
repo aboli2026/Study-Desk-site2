@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Settings, FileText } from 'lucide-react';
-import { NoteItem } from './types';
+import { NoteItem, StudyFile, StickyNoteItem } from './types';
 import { NotesView } from './components/NotesView';
 import { SettingsView } from './components/SettingsView';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import {
   getAllNotesFromStorage,
   saveAllNotesToStorage,
+  getAllStudyFiles,
+  saveFileEditsToStorage,
 } from './utils/fileStorage';
 
 const STORAGE_KEYS = {
@@ -16,6 +18,7 @@ const STORAGE_KEYS = {
 export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [targetNoteIdToOpen, setTargetNoteIdToOpen] = useState<string | null>(null);
+  const [studyFiles, setStudyFiles] = useState<StudyFile[]>([]);
 
   // Load notes from localStorage as initial state, then hydrate from IndexedDB
   const [notes, setNotes] = useState<NoteItem[]>(() => {
@@ -35,12 +38,15 @@ export default function App() {
     ];
   });
 
-  // Hydrate notes from IndexedDB on startup (with automatic fallback to localStorage)
+  // Hydrate notes and study files from IndexedDB on startup
   useEffect(() => {
     let isCancelled = false;
-    const loadNotes = async () => {
+    const loadData = async () => {
       try {
-        const idbNotes = await getAllNotesFromStorage();
+        const [idbNotes, idbFiles] = await Promise.all([
+          getAllNotesFromStorage(),
+          getAllStudyFiles(),
+        ]);
         if (isCancelled) return;
         if (idbNotes && idbNotes.length > 0) {
           setNotes(idbNotes);
@@ -58,12 +64,15 @@ export default function App() {
             }
           }
         }
+        if (idbFiles) {
+          setStudyFiles(idbFiles);
+        }
       } catch (err) {
-        console.warn('Failed to load notes from IndexedDB:', err);
+        console.warn('Failed to load data from IndexedDB:', err);
       }
     };
 
-    loadNotes();
+    loadData();
     return () => {
       isCancelled = true;
     };
@@ -121,13 +130,57 @@ export default function App() {
     [notes, persistNotes, targetNoteIdToOpen]
   );
 
+  const handleUpdateStickyNote = useCallback(async (fileId: string, updatedStickyNote: StickyNoteItem) => {
+    setStudyFiles((prevFiles) => {
+      return prevFiles.map((file) => {
+        if (file.id === fileId) {
+          const updatedNotes = (file.stickyNotes || []).map((n) =>
+            n.id === updatedStickyNote.id ? updatedStickyNote : n
+          );
+          saveFileEditsToStorage(fileId, {
+            fileId,
+            pageStrokes: file.pageStrokes || {},
+            stickyNotes: updatedNotes,
+            currentPage: file.currentPage || 1,
+            updatedAt: new Date().toISOString(),
+          });
+          return { ...file, stickyNotes: updatedNotes };
+        }
+        return file;
+      });
+    });
+  }, []);
+
+  const handleDeleteStickyNote = useCallback(async (fileId: string, stickyNoteId: string) => {
+    setStudyFiles((prevFiles) => {
+      return prevFiles.map((file) => {
+        if (file.id === fileId) {
+          const updatedNotes = (file.stickyNotes || []).filter((n) => n.id !== stickyNoteId);
+          saveFileEditsToStorage(fileId, {
+            fileId,
+            pageStrokes: file.pageStrokes || {},
+            stickyNotes: updatedNotes,
+            currentPage: file.currentPage || 1,
+            updatedAt: new Date().toISOString(),
+          });
+          return { ...file, stickyNotes: updatedNotes };
+        }
+        return file;
+      });
+    });
+  }, []);
+
   const handleRefreshAllData = useCallback(async () => {
     try {
-      const idbNotes = await getAllNotesFromStorage();
+      const [idbNotes, idbFiles] = await Promise.all([
+        getAllNotesFromStorage(),
+        getAllStudyFiles(),
+      ]);
       if (idbNotes && idbNotes.length > 0) {
         setNotes(idbNotes);
         localStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(idbNotes));
       }
+      setStudyFiles(idbFiles || []);
     } catch (e) {
       console.warn('Refresh error:', e);
     }
@@ -174,6 +227,9 @@ export default function App() {
           onAddNote={handleAddNote}
           onUpdateNote={handleUpdateNote}
           onDeleteNote={handleDeleteNote}
+          studyFiles={studyFiles}
+          onUpdateStickyNote={handleUpdateStickyNote}
+          onDeleteStickyNote={handleDeleteStickyNote}
           initialNoteId={targetNoteIdToOpen}
         />
       </main>
@@ -191,6 +247,8 @@ export default function App() {
             <SettingsView
               notesCount={notes.length}
               notes={notes}
+              studyFiles={studyFiles}
+              stickyNotesCount={studyFiles.reduce((acc, f) => acc + (f.stickyNotes?.length || 0), 0)}
               onClose={() => setIsSettingsOpen(false)}
               onDataRestored={handleRefreshAllData}
             />
