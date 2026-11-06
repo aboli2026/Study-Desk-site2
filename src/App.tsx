@@ -189,7 +189,7 @@ export default function App() {
   return (
     <div
       dir="rtl"
-      className="flex flex-col p-2 sm:p-3.5 bg-neutral-100/90 text-neutral-900 h-screen w-screen select-none overflow-hidden relative pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]"
+      className="flex flex-col p-2 sm:p-3.5 bg-neutral-100 text-neutral-900 h-screen w-screen select-none overflow-hidden relative pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]"
     >
       {/* Offline Status Connectivity Banner */}
       <OfflineIndicator />

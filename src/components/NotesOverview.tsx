@@ -751,11 +751,11 @@ export const NotesOverview: React.FC<NotesOverviewProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-neutral-50/60 overflow-hidden relative select-auto font-sans" dir="rtl">
+    <div className="flex-1 flex flex-col h-full bg-neutral-50 overflow-hidden relative select-auto font-sans" dir="rtl">
       {/* Unified Search, Folders & File Filters Toolbar (Compact Mobile-Optimized) */}
       {activeTab !== 'tasks' && (
         <div
-          className={`bg-white/95 backdrop-blur-md border-b border-neutral-200/80 px-3 sm:px-6 py-2.5 shrink-0 shadow-2xs relative transition-all ${
+          className={`bg-white border-b border-neutral-200/80 px-3 sm:px-6 py-2.5 shrink-0 shadow-2xs relative transition-all ${
             isCategorySubmenuOpen || isFileSubmenuOpen ? 'z-40' : 'z-20'
           }`}
         >

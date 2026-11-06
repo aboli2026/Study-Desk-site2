@@ -34,10 +34,10 @@ export const OfflineIndicator: React.FC = () => {
   return (
     <div
       dir="rtl"
-      className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3.5 py-2 rounded-2xl shadow-xl text-xs font-semibold backdrop-blur-md transition-all duration-300 animate-fade-in ${
+      className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3.5 py-2 rounded-2xl shadow-xl text-xs font-semibold transition-all duration-300 animate-fade-in ${
         isOnline
-          ? 'bg-emerald-600/90 text-white'
-          : 'bg-neutral-900/90 border border-neutral-700 text-neutral-200'
+          ? 'bg-emerald-600 text-white'
+          : 'bg-neutral-900 border border-neutral-700 text-neutral-200'
       }`}
     >
       {isOnline ? (
